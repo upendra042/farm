@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Your existing styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f9f4; /* Light green background */
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #d1e7d1;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #2c6b2f; /* Dark green color */
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1e7d1;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .form-group button {
+            background-color: #2c6b2f;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .form-group button:hover {
+            background-color: #1b5e20;
+        }
+
+        .contract-list {
+            margin-top: 20px;
+        }
+
+        .contract-item {
+            background-color: #eaf4e7;
+            border: 1px solid #d1e7d1;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .contract-item h2 {
+            font-size: 20px;
+            margin: 0;
+            color: #2c6b2f;
+        }
+
+        .contract-item p {
+            margin: 10px 0;
+        }
+
+        .contract-item button {
+            background-color: #2c6b2f;
+            color: #ffffff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .contract-item button:hover {
+            background-color: #1b5e20;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Contract Management</h1>
+        
+        <!-- Form to Create a New Contract -->
+        <div class="form-group">
+            <h2>Create a New Contract</h2>
+            <form id="contract-form">
+                <label for="contract-title">Contract Title</label>
+                <input type="text" id="contract-title" name="contract-title" required>
+
+                <label for="contract-details">Contract Details</label>
+                <textarea id="contract-details" name="contract-details" rows="4" required></textarea>
+
+                <label for="contract-start-date">Start Date</label>
+                <input type="date" id="contract-start-date" name="contract-start-date" required>
+
+                <label for="contract-end-date">End Date</label>
+                <input type="date" id="contract-end-date" name="contract-end-date" required>
+
+                <label for="contract-status">Status</label>
+                <select id="contract-status" name="contract-status" required>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+
+                <label for="farmer-id">Farmer ID</label>
+                <input type="text" id="farmer-id" name="farmer-id" required>
+
+                <button type="submit">Create Contract</button>
+            </form>
+        </div>
+
+        <!-- Section to View Existing Contracts -->
+        <div class="contract-list">
+            <h2>Existing Contracts</h2>
+            <!-- Existing contract items will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+
+    <script>
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
+        import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQKt9aR2m9S4R6-W7q3zGU4_1x5LAA6pk",
+            authDomain: "contractbasedfarming.firebaseapp.com",
+            projectId: "contractbasedfarming",
+            storageBucket: "contractbasedfarming.appspot.com",
+            messagingSenderId: "37225914973",
+            appId: "1:37225914973:web:7977c29db9e103bb5663b4"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('contract-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Collect form data
+            const formData = new FormData(this);
+            const contractData = {};
+            formData.forEach((value, key) => {
+                contractData[key] = value;
+            });
+
+            // Add a timestamp for each entry
+            contractData.timestamp = new Date().toISOString();
+
+            try {
+                // Add data to Firestore
+                const docRef = await addDoc(collection(db, 'contracts'), contractData);
+                alert('Contract created successfully!');
+                document.getElementById('contract-form').reset(); // Clear the form
+                // Optionally redirect or refresh the page
+                // window.location.href = 'farmer.html'; 
+            } catch (error) {
+                console.error('Error creating contract:', error);
+                alert('Error creating contract. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

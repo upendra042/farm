@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Client Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e8f5e9; /* Light green background */
+            color: #2e7d32; /* Dark green text */
+        }
+        .nav-justify-content-end {
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+            padding: 8px 16px;
+            background-color: #388e3c; /* Dark green background */
+            color: white;
+        }
+        .nav-link-active {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            padding: 8px 20px;
+        }
+        .nav-link-active:hover {
+            background-color: #2c6b2f; /* Slightly darker green */
+            border-radius: 5px;
+        }
+        header {
+            padding: 15px 0;
+            background-color: #388e3c; /* Dark green background */
+            color: white;
+        }
+        .profile-section {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .profile-section img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+        }
+        .profile-section button {
+            margin-top: 10px;
+        }
+        .dashboard-card {
+            margin-bottom: 20px;
+        }
+        .contract-management {
+            margin: 20px;
+        }
+        .contract-table thead th {
+            background-color: #c8e6c9; /* Light green */
+        }
+        .notification-symbol {
+            font-size: 24px;
+            color: #2e7d32; /* Dark green */
+            cursor: pointer;
+        }
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            z-index: 1000;
+        }
+        .notification-dropdown.show {
+            display: block;
+        }
+        .notification-dropdown .dropdown-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .notification-dropdown .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        .notification-dropdown .dropdown-item:hover {
+            background-color: #e8f5e9; /* Light green background for hover effect */
+        }
+        .filter-form {
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+        }
+        /* Chat Button Styles */
+        .chat-button,
+        .youtube-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #388e3c; /* Dark green background */
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .chat-button:hover {
+            background-color: #2c6b2f; /* Slightly darker green */
+        }
+        .youtube-button {
+            bottom: 100px; /* Position above the chat button */
+            background-color: #ffff; /* Red background for YouTube */
+            color: white;
+        }
+        .youtube-button:hover {
+            background-color: #ffff; /* Darker red for hover effect */
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">👤 Buyer Dashboard</h1>
+    <header>
+        <ul class="nav-justify-content-end">
+            <li class="nav-item">
+                <a href="starting.html" class="nav-link-active" aria-current="page">Home</a>
+            </li>
+            <li class="nav-item">
+                <a href="newclient.html" class="nav-link-active" aria-current="page">Create Contract</a>
+            </li>
+            <li class="nav-item">
+                <a href="profile.html" class="nav-link-active" aria-current="page">Profile</a>
+            </li>
+            <li class="nav-item">
+                <a href="buyerlogin.html" class="nav-link-active" aria-current="page">Logout</a>
+            </li>
+        </ul>
+    </header>
+
+    <!-- Filter Section -->
+    <section class="container">
+        <div class="filter-form">
+            <form id="filterForm" class="d-flex">
+                <input type="text" id="cropTypeFilter" class="form-control me-2" placeholder="Enter crop type">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+        </div>
+
+        <!-- Contract Management Section -->
+        <div class="contract-management">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Contract Management</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped contract-table" id="contractTable">
+                        <thead>
+                            <tr>
+                                <th>Contract ID</th>
+                                <th>Crop Type</th>
+                                <th>Quantity</th>
+                                <th>Delivery Date</th>
+                                <th>Price Per Unit</th>
+                                <th>Location</th>
+                                <th>Farmer Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dynamic rows for contracts will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chat Button -->
+    <a href="https://app-xuly9tluurpyfa4rxifntt.streamlit.app/" target="_blank" class="chat-button">💬</a>
+
+    <!-- YouTube Button -->
+    <a href="https://app-realtimeai.streamlit.app/" target="_blank" class="youtube-button">🎥</a>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQKt9aR2m9S4R6-W7q3zGU4_1x5LAA6pk",
+            authDomain: "contractbasedfarming.firebaseapp.com",
+            databaseURL: "https://contractbasedfarming-default-rtdb.firebaseio.com/",
+            projectId: "contractbasedfarming",
+            storageBucket: "contractbasedfarming.appspot.com",
+            messagingSenderId: "37225914973",
+            appId: "1:37225914973:web:7977c29db9e103bb5663b4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+
+        function fetchContracts() {
+            const contractsRef = ref(database, 'crops');
+
+            onValue(contractsRef, (snapshot) => {
+                const data = snapshot.val();
+                console.log('Fetched data:', data); // Log the fetched data
+
+                if (data) {
+                    displayContracts(data);
+                } else {
+                    console.log('No contracts found.');
+                }
+            }, (error) => {
+                console.error('Error fetching contracts:', error);
+            });
+        }
+
+        function displayContracts(data) {
+            const contractTableBody = document.getElementById('contractTable').getElementsByTagName('tbody')[0];
+            contractTableBody.innerHTML = '';
+
+            for (const id in data) {
+                const contract = data[id];
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td>${id}</td>
+                    <td>${contract.crop_name}</td>
+                    <td>${contract.quantity}</td>
+                    <td>${contract.harvest_date}</td>
+                    <td>${contract.price_per_unit}</td>
+                    <td>${contract.location}</td>
+                    <td>${contract.farmer_name}</td>
+                    <td>
+                        <a href="contract.html?id=${id}" class="btn btn-info btn-sm">Make a Contract</a>
+                        <br>
+                        <a href="edit-contract.html?id=${id}" class="btn btn-warning btn-sm">Edit Contract</a>
+                    </td>
+                `;
+
+                contractTableBody.appendChild(row);
+            }
+        }
+
+        document.getElementById('filterForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const filterValue = document.getElementById('cropTypeFilter').value.toLowerCase();
+            const contractTableBody = document.getElementById('contractTable').getElementsByTagName('tbody')[0];
+
+            const rows = contractTableBody.getElementsByTagName('tr');
+            Array.from(rows).forEach(row => {
+                const cropNameCell = row.cells[1].textContent.toLowerCase();
+                row.style.display = cropNameCell.includes(filterValue) ? '' : 'none';
+            });
+        });
+
+        fetchContracts();
+    </script>
+
+</body>
+</html>
